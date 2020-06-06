@@ -1,3 +1,5 @@
+cargo-features = ["resolver"]
+
 [package]
 name = "libtock"
 version = "0.2.0"
@@ -15,6 +17,11 @@ __internal_disable_gpio_in_integration_test = []
 libtock-core = { path = "core" }
 libtock_codegen = { path = "codegen" }
 futures = { version = "0.3.1", default-features = false, features = ["unstable", "cfg-target-has-atomic"] }
+cortex-m-semihosting = "0.3.3"
+num-traits = {version = "0.2", default-features = false, features = ["libm"]}
+num-integer = {version = "0.1.36",  default-features = false}
+num-bigint = {version = "0.2",  default-features = false}
+wasmi = {version = "*", default-features=false, features=["core"]}
 
 [dev-dependencies]
 corepack = { version = "0.4.0", default-features = false, features = ["alloc"] }
