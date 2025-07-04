@@ -7,6 +7,7 @@ unsafe impl RawSyscalls for crate::fake::Syscalls {
         match r0.try_into().expect("too-large Yield ID passed") {
             yield_id::NO_WAIT => panic!("yield-no-wait called without an argument"),
             yield_id::WAIT => super::yield_impl::yield_wait(),
+            yield_id::WAIT_FOR => panic!("yield-wait-for called without arguments"),
             id => panic!("unknown yield ID {}", id),
         }
     }
@@ -21,10 +22,21 @@ unsafe impl RawSyscalls for crate::fake::Syscalls {
                 // we fail the test case regardless.
                 panic!("yield-wait called with an argument");
             }
+            yield_id::WAIT_FOR => panic!("yield wait for called with just one argument"),
             id => panic!("unknown yield ID {}", id),
         }
     }
-
+    unsafe fn yield3([r0, r1, r2]: [Register; 3]) {
+        crate::fake::syscalls::assert_valid((r0, r1, r2));
+        match r0.try_into().expect("too-large Yield ID passed") {
+            yield_id::NO_WAIT => panic!("yield-no-wait called with 2 arguments"),
+            yield_id::WAIT => panic!("yield-wait called with 2 arguments"),
+            yield_id::WAIT_FOR => unsafe {
+                super::yield_impl::yield_wait_for(r1.into(), r2.into());
+            },
+            id => panic!("unknown yield ID {}", id),
+        }
+    }
     unsafe fn syscall1<const CLASS: usize>([r0]: [Register; 1]) -> [Register; 2] {
         match CLASS {
             syscall_class::MEMOP => super::memop_impl::memop(r0, 0u32.into()),
