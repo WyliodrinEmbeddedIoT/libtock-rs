@@ -42,7 +42,7 @@ fn kernel_integration() {
     adc.set_value(0, 100);
     assert!(fake::Syscalls::command(DRIVER_NUM, SINGLE_SAMPLE, 0, 1).is_success());
 
-    let listener = Cell::<Option<(u32,)>>::new(None);
+    let listener = Cell::<Option<(u32, u32, u32)>>::new(None);
     share::scope(|subscribe| {
         assert_eq!(
             fake::Syscalls::subscribe::<_, _, DefaultConfig, DRIVER_NUM, 0>(subscribe, &listener),
@@ -51,7 +51,7 @@ fn kernel_integration() {
 
         adc.set_value(0, 100);
         assert_eq!(fake::Syscalls::yield_no_wait(), YieldNoWaitReturn::Upcall);
-        assert_eq!(listener.get(), Some((100,)));
+        assert_eq!(listener.get(), Some((0, 0, 100)));
 
         adc.set_value(0, 200);
         assert_eq!(fake::Syscalls::yield_no_wait(), YieldNoWaitReturn::NoUpcall);
