@@ -75,13 +75,7 @@ impl<S: Syscalls> Adc<S> {
 
     /// Returns the reference voltage in millivolts (mV)
     pub fn get_reference_voltage_mv(channel: usize) -> Result<u32, ErrorCode> {
-        S::command(
-            DRIVER_NUM,
-            GET_VOLTAGE_REF,
-            (channel as usize).try_into().unwrap(),
-            0,
-        )
-        .to_result()
+        S::command(DRIVER_NUM, GET_VOLTAGE_REF, channel.try_into().unwrap(), 0).to_result()
     }
 }
 
