@@ -24,12 +24,13 @@ fn read_single_sample() {
     let kernel = fake::Kernel::new();
     let driver = fake::Adc::new();
     kernel.add_driver(&driver);
+    let chnl = Adc::get_number_of_channels().unwrap();
 
-    assert_eq!(Adc::read_single_sample(), Ok(()));
+    assert_eq!(Adc::read_single_sample(chnl), Ok(()));
     assert!(driver.is_busy());
 
-    assert_eq!(Adc::read_single_sample(), Err(ErrorCode::Busy));
-    assert_eq!(Adc::read_single_sample_sync(), Err(ErrorCode::Busy));
+    assert_eq!(Adc::read_single_sample(chnl), Err(ErrorCode::Busy));
+    assert_eq!(Adc::read_single_sample_sync(chnl), Err(ErrorCode::Busy));
 }
 
 #[test]
@@ -43,19 +44,21 @@ fn register_unregister_listener() {
         sample.set(Some(adc_val));
     });
     share::scope(|subscribe| {
-        assert_eq!(Adc::read_single_sample(), Ok(()));
-        driver.set_value(100);
+        let chnl = Adc::get_number_of_channels().unwrap();
+
+        assert_eq!(Adc::read_single_sample(chnl), Ok(()));
+        driver.set_value(chnl.try_into().unwrap(), 100);
         assert_eq!(fake::Syscalls::yield_no_wait(), YieldNoWaitReturn::NoUpcall);
 
         assert_eq!(Adc::register_listener(&listener, subscribe), Ok(()));
-        assert_eq!(Adc::read_single_sample(), Ok(()));
-        driver.set_value(100);
+        assert_eq!(Adc::read_single_sample(chnl), Ok(()));
+        driver.set_value(chnl.try_into().unwrap(), 100);
         assert_eq!(fake::Syscalls::yield_no_wait(), YieldNoWaitReturn::Upcall);
         assert_eq!(sample.get(), Some(100));
 
         Adc::unregister_listener();
-        assert_eq!(Adc::read_single_sample(), Ok(()));
-        driver.set_value(100);
+        assert_eq!(Adc::read_single_sample(chnl), Ok(()));
+        driver.set_value(chnl.try_into().unwrap(), 100);
         assert_eq!(fake::Syscalls::yield_no_wait(), YieldNoWaitReturn::NoUpcall);
     });
 }
@@ -66,6 +69,8 @@ fn read_single_sample_sync() {
     let driver = fake::Adc::new();
     kernel.add_driver(&driver);
 
-    driver.set_value_sync(1000);
-    assert_eq!(Adc::read_single_sample_sync(), Ok(1000));
+    let chnl = Adc::get_number_of_channels().unwrap();
+
+    driver.set_value_sync(chnl.try_into().unwrap(), 1000);
+    assert_eq!(Adc::read_single_sample_sync(chnl), Ok(1000));
 }
