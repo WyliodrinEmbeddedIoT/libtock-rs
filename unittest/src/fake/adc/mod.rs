@@ -32,7 +32,7 @@ impl Adc {
     pub fn set_value(&self, channel: i32, sample: i32) {
         if self.busy.get() {
             self.share_ref
-                .schedule_upcall(0, (sample as u32, channel as u32, 0)) // Pass sample first for listener otherwise it will not see the correct value
+                .schedule_upcall(0, (sample as u32, channel as u32, 0)) // Pass sample first for listener otherwise it will not see the correct sample value
                 .expect("Unable to schedule upcall");
             self.busy.set(false);
         }
