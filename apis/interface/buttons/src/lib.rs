@@ -110,6 +110,10 @@ impl<S: Syscalls> Buttons<S> {
     pub fn unregister_listener() {
         S::unsubscribe(DRIVER_NUM, 0)
     }
+
+    pub fn wait_for_button(driver_number: u32, subscribe_number: u32) {
+        S::yield_wait_for(driver_number, subscribe_number);
+    }
 }
 
 /// A wrapper around a closure to be registered and called when

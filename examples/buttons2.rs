@@ -9,14 +9,12 @@ use libtock::console::Console;
 use libtock::leds::Leds;
 use libtock::runtime::{set_main, stack_size};
 use libtock_platform::{share, Syscalls};
-use libtock_runtime::TockSyscalls;
+// use libtock_runtime::TockSyscalls;
 
 set_main! {main}
 stack_size! {0x1000}
 
 fn main() {
-    write!(Console::writer(), "hello").unwrap();
-    writeln!(Console::writer(), "hello").unwrap();
     let listener = ButtonListener(|button, state| {
         let _ = Leds::toggle(button);
         // writeln!(Console::writer(), "button {:?}: {:?}", button, state).unwrap();
@@ -27,7 +25,6 @@ fn main() {
         share::scope(|subscribe| {
             // Subscribe to the button callback.
             Buttons::register_listener(&listener, subscribe).unwrap();
-
             // Enable interrupts for each button press.
             for i in 0..buttons_count {
                 Buttons::enable_interrupts(i).unwrap();
@@ -38,8 +35,8 @@ fn main() {
                 for i in 0..buttons_count {
                     let driver_number: u32 = 0x3;
                     let subscribe_number: u32 = i as u32;
-                    TockSyscalls::yield_wait_for(driver_number, subscribe_number);
-                    writeln!(Console::writer(), "button pressed").unwrap();
+                    Buttons::wait_for_button(driver_number, subscribe_number);
+                    writeln!(Console::writer(), "button pressed (yield_wait_for)").unwrap();
                 }
             }
         });
